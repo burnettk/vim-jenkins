@@ -1,0 +1,31 @@
+*jenkins.txt*  Some vim integrations for jenkins.
+
+Author:  Kevin Burnett <http://notkeepingitreal.com/>
+License: Same terms as Vim itself (see |license|)
+
+This plugin is only available if 'compatible' is not set.
+
+                                                *jenkins*
+See also the README at https://github.com/burnettk/vim-jenkins.
+
+FEATURES                                      *jenkins-features*
+
+Interact with your jenkins instance via its API from within vim.
+
+                                                *jenkins-:JenkinsValidateJenkinsFile*
+:JenkinsValidateJenkinsFile   Validate your Jenkinsfile for syntactic correctness
+                              using the wonderful built-in support in the Jenkins API.
+
+                                                *jenkins-:JenkinsShowLastBuildResult*
+:JenkinsShowLastBuildResult   After you've documented your build plan path in a
+                              comment in your Jenkinsfile (// BUILD_PLAN:
+                              /my/hot/path/without/buildNumber), this will grab the
+                              current status of your build from the jenkins API.
+
+ABOUT                                           *jenkins-about*
+
+Grab the latest version or report a bug on GitHub:
+
+https://github.com/burnettk/vim-jenkins
+
+ vim:tw=78:et:ft=help:norl:
