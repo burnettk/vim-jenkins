@@ -14,7 +14,7 @@ function! JenkinsShowLastBuildResult() "{{{
 
   if JenkinsHasJenkinsfile()
 		if JenkinsJenkinsfileIncludesBuildUrl()
-			let l:jenkins_build_plan_path_from_jenkinsfile = JenkinsChomp(system('grep BUILD_PATH Jenkinsfile | sed -e "s/.*BUILD_PATH: //g"'))
+			let l:jenkins_build_plan_path_from_jenkinsfile = JenkinsChomp(system('grep BUILD_PLAN_PATH Jenkinsfile | sed -e "s/.*BUILD_PLAN_PATH: //g"'))
 
 			let l:jenkins_build_plan_api_path = l:jenkins_build_plan_path_from_jenkinsfile . '/lastCompletedBuild/api/json'
 			let l:jenkins_build_plan_url = g:jenkins_url . l:jenkins_build_plan_api_path
@@ -25,7 +25,7 @@ function! JenkinsShowLastBuildResult() "{{{
 			call JenkinsLogStuff(l:build_info['fullDisplayName'])
 			call JenkinsLogStuff(l:build_info['result'])
 		else
-      call JenkinsLogStuff('Jenkinsfile must include a BUILD_PATH to use the show last build function')
+      call JenkinsLogStuff('Jenkinsfile must include a BUILD_PLAN_PATH to use the show last build function')
 		endif
 	else
 		call JenkinsNoJenkinsfileError()
@@ -119,7 +119,7 @@ endfunction
 
 function! JenkinsJenkinsfileIncludesBuildUrl() "{{{
 	let l:jenkinsfileFilename = "Jenkinsfile"
-	return JenkinsHasJenkinsfile() && match(readfile(l:jenkinsfileFilename), "BUILD_PATH") != -1
+	return JenkinsHasJenkinsfile() && match(readfile(l:jenkinsfileFilename), "BUILD_PLAN_PATH") != -1
 endfunction "}}}
 
 function! JenkinsHasJenkinsfile() "{{{

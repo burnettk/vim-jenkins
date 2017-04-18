@@ -22,7 +22,7 @@ jenkins url and some credentials that can get you in there:
 
 In your Jenkinfile, add a comment like this:
 
-    // BUILD_PATH: /view/Sweetapps/job/hot-app/job/master
+    // BUILD_PLAN_PATH: /view/Sweetapps/job/hot-app/job/master
 
 Then, call JenkinsShowLastBuildResult by using the "jenkins build" shortcut:
 
