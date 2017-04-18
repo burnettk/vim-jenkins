@@ -36,6 +36,8 @@ Call JenkinsValidateJenkinsFile by using the "jenkins Jenkinsfile" shortcut:
 
 Major props to the Jenkins guys for providing this killer feature via the API.
 
+Thanks to [jasquat][jasquat] for collaborating on the initial version of this.
+
 ## Installation
 
 * Using [Pathogen][pathogen], run the following commands:
@@ -62,6 +64,7 @@ feeling especially charitable, follow [me][mysite] on [Twitter][mytwitter] and
 Copyright (c) Kevin Burnett.  Distributed under the same terms as Vim itself.
 See `:help license`.
 
+[jasquat]: https://github.com/jasquat
 [pathogen]: https://github.com/tpope/vim-pathogen
 [vundle]: https://github.com/gmarik/vundle
 [project]: https://github.com/burnettk/vim-jenkins
