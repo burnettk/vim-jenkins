@@ -82,7 +82,7 @@ function! JenkinsValidateJenkinsFile() "{{{
 			let g:jenkins_validation_url = g:jenkins_url
 		endif
 
-		execute '!curl -X POST -F "jenkinsfile=<Jenkinsfile" ' . g:jenkins_validation_url . '/pipeline-model-converter/validate ' . l:basic_auth_options
+		execute '!cp Jenkinsfile /tmp/Jenkinsfile && perl -pi -e "s/^\@Library\(.*$//g" /tmp/Jenkinsfile && perl -pi -e "s/^import .*$//g" /tmp/Jenkinsfile && curl -X POST -F "jenkinsfile=</tmp/Jenkinsfile" ' . g:jenkins_validation_url . '/pipeline-model-converter/validate ' . l:basic_auth_options
 	else
 		call JenkinsNoJenkinsfileError()
 	endif
