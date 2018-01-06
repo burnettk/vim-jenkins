@@ -1,6 +1,11 @@
 " jenkins.vim
 " Maintainer:	Kevin Burnett
-" Last Change: 2017 April 12
+" Last Change: 2018 January 5
+
+if exists("g:loaded_vim_jenkins")
+  finish
+endif
+let g:loaded_vim_jenkins = 1
 
 if !exists('g:jenkins_url')
   let g:jenkins_url = 'http://jenkins'
