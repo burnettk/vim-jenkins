@@ -30,9 +30,9 @@ Then, call JenkinsShowLastBuildResult by using the "jenkins build" shortcut:
 
 ### Validate Jenkinsfile
 
-Call JenkinsValidateJenkinsFile by using the "jenkins Jenkinsfile" shortcut:
+Call JenkinsValidateJenkinsFile by using the "run Jenkinsfile" shortcut:
     
-    <Leader>jj
+    <Leader>rj
 
 Major props to the Jenkins guys for providing this killer feature via the API.
 

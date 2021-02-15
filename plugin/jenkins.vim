@@ -39,7 +39,11 @@ endfunction "}}}
 
 command! JenkinsShowLastBuildResult call JenkinsShowLastBuildResult()
 
-nnoremap <Leader>jb :JenkinsShowLastBuildResult<CR>
+let g:jenkins_enable_mappings = get(g:, 'jenkins_enable_mappings', 1)
+
+if g:jenkins_enable_mappings == 1
+  nnoremap <Leader>jb :JenkinsShowLastBuildResult<CR>
+endif
 
 
 function JenkinsLogStuff(logMessage) "{{{
@@ -95,8 +99,9 @@ endfunction "}}}
 
 command! JenkinsValidateJenkinsFile call JenkinsValidateJenkinsFile()
 
-nnoremap <Leader>jj :JenkinsValidateJenkinsFile<CR>
-
+if g:jenkins_enable_mappings == 1
+  nnoremap <Leader>rj :JenkinsValidateJenkinsFile<CR>
+endif
 
 " Helper functions
 
