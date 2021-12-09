@@ -11,20 +11,6 @@ if !exists('g:jenkins_url')
   let g:jenkins_url = 'http://jenkins'
 endif
 
-function! JenkinsFoundJenkinsfilePath() "{{{
-  let l:jenkinsfileFilename = "Jenkinsfile"
-  if filereadable(l:jenkinsfileFilename)
-    return l:jenkinsfileFilename
-  else
-    let l:currentFilename = expand('%:p')
-    if (match(l:currentFilename, "Jenkinsfile") != -1) && filereadable(l:currentFilename)
-      return l:currentFilename
-    else
-      " we will later check empty() to see if we found a path
-      return ''
-    endif
-  endif
-endfunction "}}}
 
 function! JenkinsShowLastBuildResult() "{{{
   let l:basic_auth_options = ''
@@ -32,12 +18,9 @@ function! JenkinsShowLastBuildResult() "{{{
     let l:basic_auth_options = '-u ' . g:jenkins_username . ':' . g:jenkins_password
   endif
 
-  let l:fullJenkinsfilePath = JenkinsFoundJenkinsfilePath()
-  if !empty(l:fullJenkinsfilePath)
-    " check if Jenkinsfile includes BUILD_PLAN_PATH. otherwise error.
-    if match(readfile(l:fullJenkinsfilePath), "BUILD_PLAN_PATH") != -1
-      let l:findBuildPlanCommand = 'grep BUILD_PLAN_PATH ' . l:fullJenkinsfilePath . ' | sed -e "s/.*BUILD_PLAN_PATH: //g"'
-      let l:jenkins_build_plan_path_from_jenkinsfile = JenkinsChomp(system(l:findBuildPlanCommand))
+  if JenkinsHasJenkinsfile()
+    if JenkinsJenkinsfileIncludesBuildUrl()
+      let l:jenkins_build_plan_path_from_jenkinsfile = JenkinsChomp(system('grep BUILD_PLAN_PATH ' . @% . ' | sed -e "s/.*BUILD_PLAN_PATH: //g"'))
 
       let l:jenkins_build_plan_api_path = l:jenkins_build_plan_path_from_jenkinsfile . '/lastCompletedBuild/api/json'
       let l:jenkins_build_plan_url = g:jenkins_url . l:jenkins_build_plan_api_path
@@ -91,9 +74,7 @@ function JenkinsShellOutToCurl(curlCommand) "{{{
 endfunction "}}}
 
 function! JenkinsValidateJenkinsFile() "{{{
-  let l:fullJenkinsfilePath = JenkinsFoundJenkinsfilePath()
-  if !empty(l:fullJenkinsfilePath)
-    echo "doing it"
+  if JenkinsHasJenkinsfile()
     let l:basic_auth_options = ''
 
     if !exists('g:jenkins_validation_username')
@@ -111,9 +92,8 @@ function! JenkinsValidateJenkinsFile() "{{{
       let g:jenkins_validation_url = g:jenkins_url
     endif
 
-    execute '!cp ' . l:fullJenkinsfilePath . ' /tmp/Jenkinsfile && perl -pi -e "s/^\@Library\(.*$//g" /tmp/Jenkinsfile && perl -pi -e "s/^import .*$//g" /tmp/Jenkinsfile && curl -X POST -F "jenkinsfile=</tmp/Jenkinsfile" ' . g:jenkins_validation_url . '/pipeline-model-converter/validate ' . l:basic_auth_options
+    execute '!cp ' . @% ' /tmp/Jenkinsfile && perl -pi -e "s/^\@Library\(.*$//g" /tmp/Jenkinsfile && perl -pi -e "s/^import .*$//g" /tmp/Jenkinsfile && curl -X POST -F "jenkinsfile=</tmp/Jenkinsfile" ' . g:jenkins_validation_url . '/pipeline-model-converter/validate ' . l:basic_auth_options
   else
-    echo "not doing it"
     call JenkinsNoJenkinsfileError()
   endif
 endfunction "}}}
@@ -128,7 +108,7 @@ endif
 
 " credit to http://vi.stackexchange.com/questions/2867/how-do-you-chomp-a-string-in-vim
 function! JenkinsChomp(string)
-  return substitute(a:string, '\n\+$', '', '')
+    return substitute(a:string, '\n\+$', '', '')
 endfunction
 
 " credit to tpope
@@ -148,6 +128,14 @@ function! JenkinsJsonParse(string) abort
   throw "invalid JSON: ".string
 endfunction
 
+function! JenkinsJenkinsfileIncludesBuildUrl() "{{{
+  return JenkinsHasJenkinsfile() && match(readfile(@%), "BUILD_PLAN_PATH") != -1
+endfunction "}}}
+
+function! JenkinsHasJenkinsfile() "{{{
+  return filereadable(@%) && (@% =~ ".jenkinsfile$" || @% =~ "Jenkinsfile$")
+endfunction "}}}
+
 function! JenkinsNoJenkinsfileError() "{{{
-  call JenkinsLogStuff('This functionality requires a Jenkinsfile')
+  call JenkinsLogStuff('This functionality requires a *.jenkinsfile')
 endfunction "}}}
