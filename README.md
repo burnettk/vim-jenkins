@@ -59,15 +59,23 @@ Like vim-jenkins.vim? Star the repository on [GitHub][project]. And if you're
 feeling especially charitable, follow [me][mysite] on [Twitter][mytwitter] and
 [GitHub][mygithub].
 
+## Contributors
+
+[burnettk][burnettk]
+[iborovskyi][iborovskyi]
+[jasquat][jasquat]
+
 ## License
 
 Copyright (c) Kevin Burnett.  Distributed under the same terms as Vim itself.
 See `:help license`.
 
+[burnettk]: https://github.com/burnettk
+[iborovskyi]: https://github.com/iborovskyi
 [jasquat]: https://github.com/jasquat
-[pathogen]: https://github.com/tpope/vim-pathogen
-[vundle]: https://github.com/gmarik/vundle
-[project]: https://github.com/burnettk/vim-jenkins
+[mygithub]: https://github.com/burnettk
 [mysite]: http://notkeepingitreal.com
 [mytwitter]: http://twitter.com/kbbkkbbk
-[mygithub]: https://github.com/burnettk
+[pathogen]: https://github.com/tpope/vim-pathogen
+[project]: https://github.com/burnettk/vim-jenkins
+[vundle]: https://github.com/gmarik/vundle
