@@ -11,13 +11,17 @@ if !exists('g:jenkins_url')
   let g:jenkins_url = 'http://jenkins'
 endif
 
+function! CurrentFilePathLooksLikeJenkinsfile(currentFilename) "{{{
+  return a:currentFilename =~ ".jenkinsfile$" || a:currentFilename =~ "Jenkinsfile$"
+endfunction "}}}
+
 function! JenkinsFoundJenkinsfilePath() "{{{
   let l:jenkinsfileFilename = "Jenkinsfile"
   if filereadable(l:jenkinsfileFilename)
     return l:jenkinsfileFilename
   else
     let l:currentFilename = expand('%:p')
-    if (match(l:currentFilename, "Jenkinsfile") != -1) && filereadable(l:currentFilename)
+    if CurrentFilePathLooksLikeJenkinsfile(l:currentFilename) && filereadable(l:currentFilename)
       return l:currentFilename
     else
       " we will later check empty() to see if we found a path
@@ -93,7 +97,6 @@ endfunction "}}}
 function! JenkinsValidateJenkinsFile() "{{{
   let l:fullJenkinsfilePath = JenkinsFoundJenkinsfilePath()
   if !empty(l:fullJenkinsfilePath)
-    echo "doing it"
     let l:basic_auth_options = ''
 
     if !exists('g:jenkins_validation_username')
@@ -113,7 +116,6 @@ function! JenkinsValidateJenkinsFile() "{{{
 
     execute '!cp ' . l:fullJenkinsfilePath . ' /tmp/Jenkinsfile && perl -pi -e "s/^\@Library\(.*$//g" /tmp/Jenkinsfile && perl -pi -e "s/^import .*$//g" /tmp/Jenkinsfile && curl -X POST -F "jenkinsfile=</tmp/Jenkinsfile" ' . g:jenkins_validation_url . '/pipeline-model-converter/validate ' . l:basic_auth_options
   else
-    echo "not doing it"
     call JenkinsNoJenkinsfileError()
   endif
 endfunction "}}}
