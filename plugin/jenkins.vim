@@ -30,6 +30,7 @@ function! JenkinsFoundJenkinsfilePath() "{{{
   endif
 endfunction "}}}
 
+" LAST BUILD RESULT
 function! JenkinsShowLastBuildResult() "{{{
   let l:basic_auth_options = ''
   if exists('g:jenkins_username')
@@ -65,6 +66,96 @@ let g:jenkins_enable_mappings = get(g:, 'jenkins_enable_mappings', 1)
 
 if g:jenkins_enable_mappings == 1
   nnoremap <Leader>jb :JenkinsShowLastBuildResult<CR>
+endif
+
+
+" REBUILD BUILDNUM
+function! JenkinsRebuild(buildNumber) "{{{
+  let l:basic_auth_options = ''
+  if exists('g:jenkins_username')
+    let l:basic_auth_options = '-u ' . g:jenkins_username . ':' . g:jenkins_password
+  endif
+
+  let l:fullJenkinsfilePath = JenkinsFoundJenkinsfilePath()
+  if !empty(l:fullJenkinsfilePath)
+    " check if Jenkinsfile includes BUILD_PLAN_PATH. otherwise error.
+    if match(readfile(l:fullJenkinsfilePath), "BUILD_PLAN_PATH") != -1
+      " check if build number is a number
+      if a:buildNumber !~# '^\d\+$'
+        call JenkinsLogStuff('Requires build number')
+      else
+        let l:basic_auth_options = ''
+        if exists('g:jenkins_username')
+          let l:basic_auth_options = '-u ' . g:jenkins_username . ':' . g:jenkins_password
+        endif
+        let l:findBuildPlanCommand = 'grep BUILD_PLAN_PATH ' . l:fullJenkinsfilePath . ' | sed -e "s/.*BUILD_PLAN_PATH: //g"'
+        let l:jenkins_build_plan_path_from_jenkinsfile = JenkinsChomp(system(l:findBuildPlanCommand))
+        let l:jenkins_job_name = JenkinsChomp(substitute(system(l:findBuildPlanCommand),'^.*job/','',''))
+  
+        " Thanks nirzari
+        " https://github.com/nirzari/groovy-scripts
+        let l:rebuild_groovy = 'import hudson.model.*\n
+          \import jenkins.model.Jenkins\n
+          \
+          \
+          \def jobName = \"' . l:jenkins_job_name . '\"\n
+          \
+          \def job = Jenkins.instance.getItemByFullName(jobName)\n
+          \def build = ' . a:buildNumber . '\n
+          \
+          \def my_job = job.getBuildByNumber(build)\n
+          \def actions = my_job.getActions(ParametersAction)\n
+          \println(my_job)\n
+          \job.scheduleBuild2(0, actions.toArray(new ParametersAction[actions.size()]))
+          \println(\"\")'
+
+        let l:jenkins_script_url = g:jenkins_url . '/scriptText'
+        call JenkinsLogStuff('Triggering rebuild')
+        execute '!echo -e "' . l:rebuild_groovy . '" > /tmp/rebuild.groovy ; curl ' . l:basic_auth_options . ' --data-urlencode "script=$(< /tmp/rebuild.groovy)" ' . l:jenkins_script_url
+      endif
+    else
+      call JenkinsLogStuff('Jenkinsfile must include a BUILD_PLAN_PATH to use the show last build function')
+    endif
+  else
+    call JenkinsNoJenkinsfileError()
+  endif
+endfunction "}}}
+
+command! -nargs=1 JenkinsRebuild  call JenkinsRebuild(<f-args>)
+
+
+" LAST BUILD LOG
+function! JenkinsShowLastBuildLog() "{{{
+  let l:basic_auth_options = ''
+  if exists('g:jenkins_username')
+    let l:basic_auth_options = '-u ' . g:jenkins_username . ':' . g:jenkins_password
+  endif
+
+  let l:fullJenkinsfilePath = JenkinsFoundJenkinsfilePath()
+  if !empty(l:fullJenkinsfilePath)
+    " check if Jenkinsfile includes BUILD_PLAN_PATH. otherwise error.
+    if match(readfile(l:fullJenkinsfilePath), "BUILD_PLAN_PATH") != -1
+      let l:findBuildPlanCommand = 'grep BUILD_PLAN_PATH ' . l:fullJenkinsfilePath . ' | sed -e "s/.*BUILD_PLAN_PATH: //g"'
+      let l:jenkins_build_plan_path_from_jenkinsfile = JenkinsChomp(system(l:findBuildPlanCommand))
+
+      let l:jenkins_build_plan_api_path = l:jenkins_build_plan_path_from_jenkinsfile . '/lastBuild/consoleText'
+      let l:jenkins_build_plan_url = g:jenkins_url . l:jenkins_build_plan_api_path
+      call JenkinsLogStuff('Fetching: ' . l:jenkins_build_plan_url)
+
+      let l:last_build_log = JenkinsChomp(JenkinsShellOutToCurl('curl -s ' . l:jenkins_build_plan_url . ' ' . l:basic_auth_options))
+      echo l:last_build_log
+    else
+      call JenkinsLogStuff('Jenkinsfile must include a BUILD_PLAN_PATH to use the show last build function')
+    endif
+  else
+    call JenkinsNoJenkinsfileError()
+  endif
+endfunction "}}}
+
+command! JenkinsShowLastBuildLog call JenkinsShowLastBuildLog()
+
+if g:jenkins_enable_mappings == 1
+  nnoremap <Leader>jl :JenkinsShowLastBuildLog<CR>
 endif
 
 
