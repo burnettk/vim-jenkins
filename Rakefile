@@ -1,5 +1,16 @@
-require 'rspec/core/rake_task'
+# for vimrunner
+# require 'rspec/core/rake_task'
+#
+# RSpec::Core::RakeTask.new
+#
+# task :default => :spec
 
-RSpec::Core::RakeTask.new
+task :ci => [:dump, :test]
 
-task :default => :spec
+task :dump do
+  sh 'vim --version'
+end
+
+task :test do
+  sh 'bundle exec vim-flavor test'
+end
