@@ -22,6 +22,16 @@ Interact with your jenkins instance via its API from within vim.
                               /my/hot/path/without/buildNumber), this will grab the
                               current status of your build from the jenkins API.
 
+:JenkinsShowLastBuildLog      After you've documented your build plan path in a
+                              comment in your Jenkinsfile (// BUILD_PLAN:
+                              /my/hot/path/without/buildNumber), this will show log
+                              of the last build from jenkins.
+
+:JenkinsRebuild               After you've documented your build plan path in a
+                              comment in your Jenkinsfile (// BUILD_PLAN:
+                              /my/hot/path/without/buildNumber), this will rebuild
+                              the specified build number.
+
 ABOUT                                           *jenkins-about*
 
 Grab the latest version or report a bug on GitHub:
