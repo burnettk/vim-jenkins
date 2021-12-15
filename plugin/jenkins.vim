@@ -1,6 +1,6 @@
 " jenkins.vim
 " Maintainer:	Kevin Burnett
-" Last Change: 2018 January 5
+" Last Change: 2021
 
 if exists("g:loaded_vim_jenkins")
   finish
@@ -30,6 +30,15 @@ function! JenkinsFoundJenkinsfilePath() "{{{
   endif
 endfunction "}}}
 
+function! JenkinsHasBuildPlanPathInJenkinsfile(fullJenkinsfilePath) "{{{
+  return match(readfile(a:fullJenkinsfilePath), "BUILD_PLAN_PATH") != -1
+endfunction "}}}"
+
+function! JenkinsBuildPlanPathFromJenkinsfile(fullJenkinsfilePath) "{{{
+  let l:findBuildPlanCommand = 'grep BUILD_PLAN_PATH ' . a:fullJenkinsfilePath . ' | sed -e "s/.*BUILD_PLAN_PATH: //g"'
+  return JenkinsChomp(system(l:findBuildPlanCommand))
+endfunction "}}}"
+
 " LAST BUILD RESULT
 function! JenkinsShowLastBuildResult() "{{{
   let l:basic_auth_options = ''
@@ -40,9 +49,8 @@ function! JenkinsShowLastBuildResult() "{{{
   let l:fullJenkinsfilePath = JenkinsFoundJenkinsfilePath()
   if !empty(l:fullJenkinsfilePath)
     " check if Jenkinsfile includes BUILD_PLAN_PATH. otherwise error.
-    if match(readfile(l:fullJenkinsfilePath), "BUILD_PLAN_PATH") != -1
-      let l:findBuildPlanCommand = 'grep BUILD_PLAN_PATH ' . l:fullJenkinsfilePath . ' | sed -e "s/.*BUILD_PLAN_PATH: //g"'
-      let l:jenkins_build_plan_path_from_jenkinsfile = JenkinsChomp(system(l:findBuildPlanCommand))
+    if JenkinsHasBuildPlanPathInJenkinsfile(l:fullJenkinsfilePath)
+      let l:jenkins_build_plan_path_from_jenkinsfile = JenkinsBuildPlanPathFromJenkinsfile(l:fullJenkinsfilePath)
 
       let l:jenkins_build_plan_api_path = l:jenkins_build_plan_path_from_jenkinsfile . '/lastCompletedBuild/api/json'
       let l:jenkins_build_plan_url = g:jenkins_url . l:jenkins_build_plan_api_path
@@ -79,7 +87,7 @@ function! JenkinsRebuild(buildNumber) "{{{
   let l:fullJenkinsfilePath = JenkinsFoundJenkinsfilePath()
   if !empty(l:fullJenkinsfilePath)
     " check if Jenkinsfile includes BUILD_PLAN_PATH. otherwise error.
-    if match(readfile(l:fullJenkinsfilePath), "BUILD_PLAN_PATH") != -1
+    if JenkinsHasBuildPlanPathInJenkinsfile(l:fullJenkinsfilePath)
       " check if build number is a number
       if a:buildNumber !~# '^\d\+$'
         call JenkinsLogStuff('Requires build number')
@@ -88,8 +96,7 @@ function! JenkinsRebuild(buildNumber) "{{{
         if exists('g:jenkins_username')
           let l:basic_auth_options = '-u ' . g:jenkins_username . ':' . g:jenkins_password
         endif
-        let l:findBuildPlanCommand = 'grep BUILD_PLAN_PATH ' . l:fullJenkinsfilePath . ' | sed -e "s/.*BUILD_PLAN_PATH: //g"'
-        let l:jenkins_build_plan_path_from_jenkinsfile = JenkinsChomp(system(l:findBuildPlanCommand))
+        let l:jenkins_build_plan_path_from_jenkinsfile = JenkinsBuildPlanPathFromJenkinsfile(l:fullJenkinsfilePath)
         let l:jenkins_job_name = JenkinsChomp(substitute(system(l:findBuildPlanCommand),'^.*job/','',''))
   
         " Thanks nirzari
@@ -133,10 +140,8 @@ function! JenkinsShowLastBuildLog() "{{{
 
   let l:fullJenkinsfilePath = JenkinsFoundJenkinsfilePath()
   if !empty(l:fullJenkinsfilePath)
-    " check if Jenkinsfile includes BUILD_PLAN_PATH. otherwise error.
-    if match(readfile(l:fullJenkinsfilePath), "BUILD_PLAN_PATH") != -1
-      let l:findBuildPlanCommand = 'grep BUILD_PLAN_PATH ' . l:fullJenkinsfilePath . ' | sed -e "s/.*BUILD_PLAN_PATH: //g"'
-      let l:jenkins_build_plan_path_from_jenkinsfile = JenkinsChomp(system(l:findBuildPlanCommand))
+    if JenkinsHasBuildPlanPathInJenkinsfile(l:fullJenkinsfilePath)
+      let l:jenkins_build_plan_path_from_jenkinsfile = JenkinsBuildPlanPathFromJenkinsfile(l:fullJenkinsfilePath)
 
       let l:jenkins_build_plan_api_path = l:jenkins_build_plan_path_from_jenkinsfile . '/lastBuild/consoleText'
       let l:jenkins_build_plan_url = g:jenkins_url . l:jenkins_build_plan_api_path

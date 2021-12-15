@@ -1,4 +1,4 @@
-# jenkins.vim
+# jenkins.vim - [![CI](https://github.com/burnettk/vim-jenkins/actions/workflows/ci.yml/badge.svg)](https://github.com/burnettk/vim-jenkins/actions/workflows/ci.yml)
 
 Do you use Jenkins? Do you use vim? Do you like cute features?
 
