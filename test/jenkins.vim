@@ -42,7 +42,7 @@ describe 'loading_plugin'
   end
 
   context 'when loaded'
-    it 'returns "-"'
+    it 'returns 1'
       Expect g:loaded_vim_jenkins ==# 1
     end
   end
@@ -65,6 +65,17 @@ describe 'setting_jenkins_url'
 end
 
 describe 'JenkinsFoundJenkinsfilePath()'
+  context 'with Jenkinsfile'
+    before
+      !touch Jenkinsfile
+    end
+    it 'finds it'
+      Expect JenkinsFoundJenkinsfilePath() ==# 'Jenkinsfile'
+    end
+  end
+end
+
+describe 'JenkinsFoundJenkinsfilePath() in tmp/test'
   before
     call delete('tmp/test', 'rf')
     call mkdir('tmp/test', 'p')
@@ -74,15 +85,6 @@ describe 'JenkinsFoundJenkinsfilePath()'
 
   after
     cd -
-  end
-
-  context 'with Jenkinsfile'
-    before
-      !touch Jenkinsfile
-    end
-    it 'finds it'
-      Expect JenkinsFoundJenkinsfilePath() ==# 'Jenkinsfile'
-    end
   end
 
   context 'with Jenkinsfile in tmp/test'
@@ -209,6 +211,12 @@ describe 'JenkinsJsonParse()'
       Expect JenkinsJsonParse('{"hot": "json"}') ==# {"hot": "json"}
       Expect JenkinsJsonParse('{"hot": "json"}')["hot"] ==# "json"
     end
+  end
+end
+
+describe 'JenkinsChomp()'
+  it 'removes trailing newlines'
+    Expect JenkinsChomp("hey\n\n\n") ==# 'hey'
   end
 end
 

@@ -190,6 +190,10 @@ function JenkinsShellOutToCurl(curlCommand) "{{{
   return system(a:curlCommand)
 endfunction "}}}
 
+function JenkinsCopyJenkinsfileIntoPlace(fullJenkinsfilePath) "{{{
+  execute 'silent !cp ' . a:fullJenkinsfilePath . ' /tmp/Jenkinsfile && perl -pi -e "s/^\@Library\(.*$//g" /tmp/Jenkinsfile && perl -pi -e "s/^import .*$//g" /tmp/Jenkinsfile'
+endfunction "}}}
+
 function! JenkinsValidateJenkinsFile() "{{{
   let l:fullJenkinsfilePath = JenkinsFoundJenkinsfilePath()
   if !empty(l:fullJenkinsfilePath)
@@ -210,7 +214,26 @@ function! JenkinsValidateJenkinsFile() "{{{
       let g:jenkins_validation_url = g:jenkins_url
     endif
 
+    " This is the only way that works. Let's just write a function that
+    " verifies it gets the gigantic string to execute and then mock the
+    " function to get the input for testing.
     execute '!cp ' . l:fullJenkinsfilePath . ' /tmp/Jenkinsfile && perl -pi -e "s/^\@Library\(.*$//g" /tmp/Jenkinsfile && perl -pi -e "s/^import .*$//g" /tmp/Jenkinsfile && curl -X POST -F "jenkinsfile=</tmp/Jenkinsfile" ' . g:jenkins_validation_url . '/pipeline-model-converter/validate ' . l:basic_auth_options
+    return
+    """" NOTE: note the return above, since the rest of this code doesn't work
+
+    call JenkinsCopyJenkinsfileIntoPlace(l:fullJenkinsfilePath)
+    if v:shell_error == '0'
+      " silent !clear
+      " let l:curl_command = 'curl -s -X POST -F "jenkinsfile=</tmp/Jenkinsfile" ' . g:jenkins_validation_url . '/pipeline-model-converter/validate ' . l:basic_auth_options
+      " let l:validation_result = JenkinsChomp(JenkinsShellOutToCurl(l:curl_command))
+      " echo l:validation_result
+      let l:curl_command = 'curl -X POST -F "jenkinsfile=</tmp/Jenkinsfile" ' . g:jenkins_validation_url . '/pipeline-model-converter/validate ' . l:basic_auth_options
+      execute '! ' . l:curl_command
+      return
+    else
+      " echom 'v:shell_error'
+      " echom v:shell_error
+    endif
   else
     call JenkinsNoJenkinsfileError()
   endif
