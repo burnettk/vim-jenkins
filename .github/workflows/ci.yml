@@ -23,7 +23,8 @@ jobs:
       uses: rhysd/action-setup-vim@v1
       with:
         # use nightly for scheduled runs and use .vim-version for CI push-based runs
-        version: ${{ github.event_name == 'schedule' && 'nightly' || env.local_vim_version }}
+        # version: ${{ github.event_name == 'schedule' && 'nightly' || env.local_vim_version }}
+        version: ${{ env.local_vim_version }}
     - name: Run tests
       # 2>&1 required to avoid interleaved stdout and stderr in log.
       run: rake ci 2>&1
